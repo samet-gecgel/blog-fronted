@@ -1,25 +1,30 @@
 "use client"
 import Navbar from '@/components/Navbar/Navbar';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import getUserIdFromToken from '@/utils/getUserIdFromToken'; 
 import { userAPI } from '../api';
 
 const page = () => {
   const router = useRouter();
-  const token = localStorage.getItem('token');
-  const userId = getUserIdFromToken(token); 
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    setToken(storedToken);
+    setUserId(getUserIdFromToken(storedToken));
+  }, []);
+
   const handleDeleteAccount = async () => {
+    if (!userId) return;
+    
     if (confirm("Hesabınızı silmek istediğinize emin misiniz?")) {
       try {
         const result = await userAPI.delete(userId);
-        console.log(result);
         
         if (result.success) {
           localStorage.removeItem("token");
-  
           alert("Hesabınız başarıyla silindi.");
           router.push("/");
         } else {

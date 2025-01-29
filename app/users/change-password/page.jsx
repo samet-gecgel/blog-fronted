@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import getUserIdFromToken from "@/utils/getUserIdFromToken";
 import Navbar from "@/components/Navbar/Navbar";
@@ -7,15 +7,22 @@ import { userAPI } from "@/app/api";
 
 const ChangePasswordPage = () => {
   const router = useRouter();
-  const token = localStorage.getItem("token");
-  const userId = getUserIdFromToken(token);
-
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    setUserId(getUserIdFromToken(storedToken));
+  }, []);
+
   const handleChangePassword = async () => {
+    if (!userId) return;
+    
     if (newPassword !== confirmNewPassword) {
       setErrorMessage("Yeni şifreler eşleşmiyor.");
       return;

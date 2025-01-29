@@ -8,9 +8,8 @@ import { userAPI } from "@/app/api";
 
 const EditUserPage = () => {
   const router = useRouter();
-  const token = localStorage.getItem("token");
-  const userId = getUserIdFromToken(token);
-
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -18,27 +17,29 @@ const EditUserPage = () => {
   const [newImage, setNewImage] = useState(null);
 
   useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    setUserId(getUserIdFromToken(storedToken));
+  }, []);
+
+  useEffect(() => {
     const fetchUserDetails = async () => {
+      if (!userId) return;
+      
       try {
         const response = await userAPI.getById(userId);
-
         if (response && response.data) {
-          console.log("Kullanıcı Bilgileri:", response.data); 
           setUserName(response.data.userName || "");
           setEmail(response.data.email || "");
           setDisplayName(response.data.displayName || "");
-          setImagePath(response.data.profileImagePath || null); 
-        } else {
-          console.error("Kullanıcı verileri boş döndü.");
+          setImagePath(response.data.profileImagePath || null);
         }
       } catch (error) {
         console.error("Kullanıcı verileri alınırken hata oluştu:", error);
       }
     };
 
-    if (userId) {
-      fetchUserDetails();
-    }
+    fetchUserDetails();
   }, [userId]);
 
   const handleImageChange = (e) => {
